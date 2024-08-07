@@ -2,10 +2,10 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 
-```
+/*
 https://github.com/ocornut/imgui/wiki/Getting-Started#example-if-you-are-using-sdl2--openglwebgl
 im learning how to setup the file structure
-```
+*/
 
 // Setup Dear ImGui context
 IMGUI_CHECKVERSION();
