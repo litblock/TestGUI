@@ -14,8 +14,8 @@ UNAME_S := $(shell uname -s)
 
 CXX=g++
 CXXFLAGS=-std=c++11 -I$(IMGUI_PATH) -I$(BACKEND) -Wall -Wformat 
-CXXFLAGS += -DIMGUI_IMPL_OPENGL_ES2 
-LINUX_GL_LIBS = -lGLESv2
+#CXXFLAGS += -DIMGUI_IMPL_OPENGL_ES2 
+LINUX_GL_LIBS = -lGL
 
 ifeq ($(UNAME_S), Linux) 
 	ECHO_MESSAGE = "Linux"
