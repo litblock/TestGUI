@@ -1,7 +1,7 @@
 EXE=TestApp
-IMGUI_PATH=imgui
-BACKEND=backend
-BUILD_PATH=build
+IMGUI_PATH=imgui/
+BACKEND=backend/
+BUILD_PATH=build/
 
 SRCS=main.cpp
 SRCS+=$(IMGUI_PATH)/imgui.cpp $(IMGUI_PATH)/imgui_demo.cpp $(IMGUI_PATH)/imgui_draw.cpp $(IMGUI_PATH)/imgui_tables.cpp $(IMGUI_PATH)/imgui_widgets.cpp
@@ -11,8 +11,8 @@ LIBS=
 
 CXX=g++
 CXXFLAGS=-std=c++11 -I$(IMGUI_PATH) -I$(BACKEND) -Wall -Wformat 
-CXXFLAGS += -DIMGUI_IMPL_OPENGL_ES2 
-LINUX_GL_LIBS = -lGL
+CXXFLAGS += -DIMGUI_IMPL_OPENGL_ES2
+LINUX_GL_LIBS = -lGLESv2
 
 ECHO_MESSAGE = "Linux"
 LIBS += $(LINUX_GL_LIBS) `pkg-config --static --libs glfw3`
