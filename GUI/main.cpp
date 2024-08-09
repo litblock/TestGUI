@@ -6,19 +6,42 @@
 #include <GLES2/gl2.h>
 #include <stdio.h>
 #include <iostream>
+#include <stdio.h>
 
+void toggleFullscreen(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
 }
 
 void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+void window_maximize_callback(GLFWwindow* window, int maximized) {
+    if (maximized) {
+        toggleFullscreen(window);
+    }
+}
+
+bool show_window = true;
+
 void render(GLFWwindow* window) {
+    
+    
+
     while (!glfwWindowShouldClose(window)) {
 
         glfwPollEvents();
+        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
+            glfwWaitEvents();
+            continue;
+        } else {
+            int width, height;
+            glfwGetFramebufferSize(window, &width, &height);
+            glViewport(0, 0, width, height);
+            ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
+        }
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -51,6 +74,20 @@ void render(GLFWwindow* window) {
             ImGui::EndMainMenuBar();
         }
 
+        
+        if (show_window) {
+            ImGui::Begin("Another Window", &show_window);
+            ImGui::Text("Hello, world!");
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            if (ImGui::Button("Click Me")) {
+                std::cout << "Button clicked" << std::endl;
+                show_window = false;
+            }
+
+            ImGui::End();
+        }
+        
+
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -69,7 +106,7 @@ int main() {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "TextEditor", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 600, "TextEditor", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -77,6 +114,9 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); 
+    
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetWindowMaximizeCallback(window, window_maximize_callback);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -101,4 +141,26 @@ int main() {
     glfwTerminate();
 
     return 0;
+}
+
+void toggleFullscreen(GLFWwindow* window) {
+    static int windowed_width = 800, windowed_height = 600;
+    static bool is_fullscreen = false;
+
+    if (!is_fullscreen) {
+        glfwGetWindowSize(window, &windowed_width, &windowed_height);
+
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    } else {
+        glfwSetWindowMonitor(window, nullptr, 50, 50, windowed_width, windowed_height, 0);
+    }
+
+    is_fullscreen = !is_fullscreen;
+
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
 }
