@@ -25,7 +25,7 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 bool show_window = true;
-bool open_popup = false;
+bool open_file_explorer = false;
 
 void render(GLFWwindow* window) {
     std::filesystem::path current_path = std::filesystem::current_path();
@@ -52,8 +52,7 @@ void render(GLFWwindow* window) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Open", "Ctrl+O")) {
-                    open_popup = true;
-                    std::cout << "Open clicked" << std::endl;
+                    open_file_explorer = true;
                 }
                 if (ImGui::MenuItem("Save", "Ctrl+S")) {
 
@@ -76,27 +75,12 @@ void render(GLFWwindow* window) {
         }
 
 
-        if (open_popup) {
-            ImGui::OpenPopup("test");
-            open_popup = false;
+        if (open_file_explorer) {
+            ImGui::OpenPopup("File Explorer");
+            open_file_explorer = false;
         }
-
-        if (ImGui::BeginPopupModal("test")) {
-            ImGui::Text("Hello");
-            if (ImGui::Button("Close")) {
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-
-        if (ImGui::BeginPopupModal("File Browser")) {
-            std::cout << "Rendering File Browser Popup" << std::endl;
-            FileExplorer::RenderFileExplorer(current_path, selected_file);
-            if (ImGui::Button("Close")) {
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
+        FileExplorer::initialize();
+        FileExplorer::RenderFileExplorer();
 
         if (show_window) {
             ImGui::Begin("Another Window", &show_window);
