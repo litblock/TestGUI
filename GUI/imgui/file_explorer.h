@@ -4,6 +4,8 @@
 #include <string>
 #include <filesystem>
 
-void RenderFileExplorer(std::filesystem::path& current_path, std::string& selected_file);
+namespace FileExplorer {
+    void RenderFileExplorer(std::filesystem::path& current_path, std::string& selected_file);
+}
 
 #endif 
