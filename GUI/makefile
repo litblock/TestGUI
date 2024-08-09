@@ -11,7 +11,7 @@ OBJS=$(SRCS:%.cpp=$(BUILD_PATH)/%.o)
 LIBS= 
 
 CXX=g++
-CXXFLAGS=-std=c++11 -I$(IMGUI_PATH) -I$(BACKEND) -Wall -Wformat 
+CXXFLAGS=-std=c++17 -I$(IMGUI_PATH) -I$(BACKEND) -Wall -Wformat 
 CXXFLAGS += -DIMGUI_IMPL_OPENGL_ES2
 LINUX_GL_LIBS = -lGLESv2
 

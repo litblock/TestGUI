@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <file_explorer.h>
+#include <filesystem>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -26,7 +27,8 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 bool show_window = true;
 
 void render(GLFWwindow* window) {
-
+    std::filesystem::path current_path = std::filesystem::current_path();
+    std::string selected_file;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -45,8 +47,6 @@ void render(GLFWwindow* window) {
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
         ImGui::ShowDemoWindow();
-
-        RenderFileExplorer();
         
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -74,6 +74,14 @@ void render(GLFWwindow* window) {
             ImGui::EndMainMenuBar();
         }
 
+        if (ImGui::BeginPopupModal("File Browser")) {
+            std::cout << "Rendering File Browser Popup" << std::endl;
+            RenderFileExplorer(current_path, selected_file);
+            if (ImGui::Button("Close")) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
 
         if (show_window) {
             ImGui::Begin("Another Window", &show_window);
