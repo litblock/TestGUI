@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <stdio.h>
+#include <file_explorer.h>
 
-void toggleFullscreen(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
     ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
@@ -18,21 +18,18 @@ void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-void window_maximize_callback(GLFWwindow* window, int maximized) {
-    if (maximized) {
-        toggleFullscreen(window);
-    }
+void window_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+    ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
 }
 
 bool show_window = true;
 
 void render(GLFWwindow* window) {
-    
-    
 
     while (!glfwWindowShouldClose(window)) {
-
         glfwPollEvents();
+
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
             glfwWaitEvents();
             continue;
@@ -49,10 +46,13 @@ void render(GLFWwindow* window) {
         ImGui::DockSpaceOverViewport();
         ImGui::ShowDemoWindow();
 
+        RenderFileExplorer();
+        
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Open", "Ctrl+O")) {
-
+                    std::cout << "Open clicked" << std::endl;
+                    ImGui::OpenPopup("File Browser");
                 }
                 if (ImGui::MenuItem("Save", "Ctrl+S")) {
 
@@ -74,7 +74,7 @@ void render(GLFWwindow* window) {
             ImGui::EndMainMenuBar();
         }
 
-        
+
         if (show_window) {
             ImGui::Begin("Another Window", &show_window);
             ImGui::Text("Hello, world!");
@@ -87,7 +87,6 @@ void render(GLFWwindow* window) {
             ImGui::End();
         }
         
-
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -106,7 +105,7 @@ int main() {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(1280, 600, "TextEditor", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 800, "TextEditor", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -116,8 +115,8 @@ int main() {
     glfwSwapInterval(1); 
     
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetWindowMaximizeCallback(window, window_maximize_callback);
-
+    glfwSetWindowSizeCallback(window, window_size_callback);
+    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -141,26 +140,4 @@ int main() {
     glfwTerminate();
 
     return 0;
-}
-
-void toggleFullscreen(GLFWwindow* window) {
-    static int windowed_width = 800, windowed_height = 600;
-    static bool is_fullscreen = false;
-
-    if (!is_fullscreen) {
-        glfwGetWindowSize(window, &windowed_width, &windowed_height);
-
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-    } else {
-        glfwSetWindowMonitor(window, nullptr, 50, 50, windowed_width, windowed_height, 0);
-    }
-
-    is_fullscreen = !is_fullscreen;
-
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
 }
