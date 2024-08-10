@@ -28,8 +28,6 @@ bool show_window = true;
 bool open_file_explorer = false;
 
 void render(GLFWwindow* window) {
-    std::filesystem::path current_path = std::filesystem::current_path();
-    std::string selected_file;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
