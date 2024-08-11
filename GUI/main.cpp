@@ -1,4 +1,5 @@
 #include "imgui.h"
+#include "code_area.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
@@ -47,6 +48,9 @@ void render(GLFWwindow* window) {
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
         ImGui::ShowDemoWindow();
+
+        CodeArea code_area = CodeArea();
+        code_area.render();
         
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
