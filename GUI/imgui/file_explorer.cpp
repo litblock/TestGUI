@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "../IconsFontAwesome6.h"
 
 namespace FileExplorer {
     std::filesystem::path current_path = std::filesystem::current_path();
@@ -54,10 +55,12 @@ namespace FileExplorer {
             ImGui::BeginChild("Scrolling");
                 for (const auto& entry : std::filesystem::directory_iterator(current_path)) {
                     if (entry.is_directory()) {
+                        //std::string(ICON_FA_FOLDER) + 
                         if (ImGui::Selectable((std::string(ICON_FA_FOLDER) + " " + entry.path().filename().string()).c_str(), false, ImGuiSelectableFlags_DontClosePopups)) {
                             current_path = entry.path();
                         }
                     } else {
+                        //std::string(ICON_FA_FILE) + 
                         if (ImGui::Selectable((std::string(ICON_FA_FILE) + " " + entry.path().filename().string()).c_str())) {
                             selected_file = entry.path().string();
                             refresh();
