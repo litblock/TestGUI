@@ -77,7 +77,7 @@ void render(GLFWwindow* window) {
             ImGui::OpenPopup("File Explorer");
             open_file_explorer = false;
         }
-        FileExplorer::initialize();
+        //FileExplorer::initialize();
         FileExplorer::RenderFileExplorer();
 
         if (show_window) {
@@ -127,6 +127,11 @@ int main() {
     ImGuiIO& io = ImGui::GetIO();
     float size_pixels = 16.0f;
     io.Fonts->AddFontFromFileTTF("JetBrainsMono-Medium.ttf", size_pixels);
+    ImFontConfig config;
+    config.MergeMode = true;
+    //config.GlyphMinAdvanceX = 13.0f; 
+    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    io.Fonts->AddFontFromFileTTF("OpenFontIcons.ttf", 16.0f, &icon_config, icon_ranges);
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      

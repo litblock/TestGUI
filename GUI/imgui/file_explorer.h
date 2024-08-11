@@ -3,17 +3,18 @@
 
 #include <string>
 #include <filesystem>
-#include <deque>
+#include <vector>
 
 
 namespace FileExplorer {
     extern std::filesystem::path current_path;
     extern std::string selected_file;
-    extern std::deque<std::filesystem::directory_entry> entries;
+    //extern std::vector<std::filesystem::directory_entry> entries;
 
-    bool update_entries();
+    //void update_entries();
     void RenderFileExplorer();  
-    void initialize();
+    void refresh();
+    //void initialize();
 }
 
 #endif 

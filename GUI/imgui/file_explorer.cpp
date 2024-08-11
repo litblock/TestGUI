@@ -3,35 +3,24 @@
 #include <filesystem>
 #include <string>
 #include <iostream>
-#include <deque>
+#include <vector>
 
 namespace FileExplorer {
     std::filesystem::path current_path = std::filesystem::current_path();
     std::string selected_file;
-    std::deque<std::filesystem::directory_entry> entries;
-    const size_t MAX_ENTRIES = 1000;
-    
-    bool update_entries() {
-        entries.clear();
-        try {
-            if (!std::filesystem::exists(current_path) || !std::filesystem::is_directory(current_path)) {
-                std::cout << ("Current path is not a valid directory: " + current_path.string()) << std::endl;
-                return false;
-            }
+    //std::vector<std::filesystem::directory_entry> entries;
 
-            for (const auto& entry : std::filesystem::directory_iterator(current_path)) {
-                entries.push_back(entry);
-                if (entries.size() >= MAX_ENTRIES) {
-                    std::cout << "Warning: Directory has more than " << MAX_ENTRIES << " entries. Only the first " << MAX_ENTRIES << " will be shown." << std::endl;
-                    break;
-                }
-            }
-            return true;
-        } catch (const std::exception& e) {
-            std::cout << ("Error reading directory: " + std::string(e.what())) << std::endl;
-            return false;
-        }
-    }
+    
+    // void update_entries() {
+    //     entries.clear();
+    //     try {
+    //         for (const auto& entry : std::filesystem::directory_iterator(current_path)) {
+    //             entries.push_back(entry);
+    //         }
+    //     } catch (const std::exception& e) {
+    //         std::cerr << "Error reading directory: " << e.what() << std::endl;
+    //     }
+    // }
 
     void RenderFileExplorer() {
         //std::cout << "Rendering file explorer" << std::endl;
@@ -48,10 +37,10 @@ namespace FileExplorer {
                 }
                 if (ImGui::ArrowButton("##up", ImGuiDir_Up)) {
                     current_path = current_path.parent_path();
-                    update_entries();
+                    //update_entries();
                 }
                 if (ImGui::Button("Refresh emoji")) {
-                    update_entries();
+                    //update_entries();
                 }
                 ImGui::SameLine(ImGui::GetWindowWidth() - 30); 
                 if (ImGui::Button("X")) {
@@ -61,43 +50,33 @@ namespace FileExplorer {
             }
 
             ImGui::Text("Current Path: %s", current_path.string().c_str());
+
             ImGui::BeginChild("Scrolling");
-            for (const auto& entry : entries) {
-                try {
-                    std::string name = entry.path().filename().string();
+                for (const auto& entry : std::filesystem::directory_iterator(current_path)) {
                     if (entry.is_directory()) {
-                        if (ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
-                            if (ImGui::IsMouseDoubleClicked(0)) {
-                                current_path /= name;
-                                if (!update_entries()) {
-                                    std::cout << ("Failed to updantries after selecting directory: " + name) << std::endl;
-                                }
-                            }
+                        if (ImGui::Selectable((std::string(ICON_FA_FOLDER) + " " + entry.path().filename().string()).c_str(), false, ImGuiSelectableFlags_DontClosePopups)) {
+                            current_path = entry.path();
                         }
                     } else {
-                        if (ImGui::Selectable(name.c_str())) {
+                        if (ImGui::Selectable((std::string(ICON_FA_FILE) + " " + entry.path().filename().string()).c_str())) {
                             selected_file = entry.path().string();
+                            refresh();
+                            ImGui::CloseCurrentPopup();
                         }
                     }
-                } catch (const std::exception& e) {
-                    std::cout << ("Error processing entry: " + std::string(e.what())) << std::endl;
                 }
-            }
             ImGui::EndChild();
 
             ImGui::EndPopup();
-        }
         
+        }
+        //current_path = std::filesystem::current_path();
     }
 
-    void initialize() {
-        try {
-            current_path = std::filesystem::current_path();
-            if (!update_entries()) {
-                std::cout << ("Failed to initialize entries") << std::endl;
-            }
-        } catch (const std::exception& e) {
-            std::cout << ("Error initializing FileExplorer: " + std::string(e.what())) << std::endl;
-        }
+    void refresh() {
+        current_path = std::filesystem::current_path();
     }
+    // void initialize() {
+    //     update_entries();
+    // }
 }
