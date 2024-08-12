@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "../IconsFontAwesome6.h"
-
+#include "globals.h"
 namespace FileExplorer {
     std::filesystem::path current_path = std::filesystem::current_path();
     std::string selected_file;
@@ -64,6 +64,9 @@ namespace FileExplorer {
                         if (ImGui::Selectable((std::string(ICON_FA_FILE) + " " + entry.path().filename().string()).c_str())) {
                             selected_file = entry.path().string();
                             refresh();
+                            code_areas.push_back(CodeArea());
+                            code_areas.back().load_file(selected_file);
+                            
                             ImGui::CloseCurrentPopup();
                         }
                     }

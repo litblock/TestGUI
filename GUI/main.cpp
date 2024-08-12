@@ -11,6 +11,7 @@
 #include "file_explorer.h"
 #include <filesystem>
 #include "IconsFontAwesome6.h"
+#include <globals.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -28,6 +29,13 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 
 bool show_window = true;
 bool open_file_explorer = false;
+std::vector<CodeArea> code_areas;
+
+void render_code_areas() {
+    for (auto& code_area : code_areas) {
+        code_area.render();
+    }
+}
 
 void render(GLFWwindow* window) {
     while (!glfwWindowShouldClose(window)) {
@@ -49,8 +57,7 @@ void render(GLFWwindow* window) {
         ImGui::DockSpaceOverViewport();
         ImGui::ShowDemoWindow();
 
-        CodeArea code_area = CodeArea();
-        code_area.render();
+        render_code_areas();
         
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -144,6 +151,10 @@ int main() {
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 120");
+
+    //defualt untitled code area
+    code_areas.push_back(CodeArea());
+
 
     render(window);
 

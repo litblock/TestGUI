@@ -19,6 +19,7 @@ class CodeArea {
         void remove_line(int line_number);
         std::string get_file_extension() const;
         std::string get_line(int line_number) const;
+        void refresh();
 
 };
 
