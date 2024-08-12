@@ -153,7 +153,9 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 120");
 
     //defualt untitled code area
-    code_areas.push_back(CodeArea());
+    CodeArea defualt = CodeArea();
+    //defualt.set_cursor_line(1);
+    code_areas.push_back(defualt);
 
 
     render(window);

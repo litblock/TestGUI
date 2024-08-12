@@ -9,20 +9,24 @@
 #include <filesystem>
 #include "code_area.h"
 #include <fstream>
+#include <string>
 
 
-CodeArea::CodeArea() {
-    file_name = "Untitled";
-    file_path = "";
-    cursor_line = 1;
-    cursor_column = 0;
+CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0) {}
+
+CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int cursor_column)
+    : file_name(std::move(name)),
+      file_path(std::move(path)),
+      cursor_line(cursor_line),
+      cursor_column(cursor_column) {
+    code_lines[1] = "";
 }
 
 void CodeArea::render() {
     ImGui::Begin(file_name.c_str());
     for (const auto& [line_number, line] : code_lines) {
         //std::cout << "Line number: " << line_number << std::endl;
-        std::cout << "Cursor line: " << cursor_line << std::endl;
+        //std::cout << "Cursor line: " << cursor_line << std::endl;
         if (line_number == cursor_line) {
             //std::cout << "Cursor line: " << cursor_line << std::endl;
             std::string before = line.substr(0, cursor_column - 1);
@@ -71,4 +75,8 @@ std::string CodeArea::get_file_extension() const {
 
 void CodeArea::refresh() {
     load_file(file_path);
+}
+
+void CodeArea::set_cursor_line(int line) {
+    cursor_line = line;
 }
