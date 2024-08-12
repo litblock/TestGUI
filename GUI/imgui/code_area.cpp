@@ -14,12 +14,25 @@
 CodeArea::CodeArea() {
     file_name = "Untitled";
     file_path = "";
+    cursor_line = 1;
+    cursor_column = 0;
 }
 
 void CodeArea::render() {
     ImGui::Begin(file_name.c_str());
     for (const auto& [line_number, line] : code_lines) {
-        ImGui::Text("%d: %s", line_number, line.c_str());
+        //std::cout << "Line number: " << line_number << std::endl;
+        std::cout << "Cursor line: " << cursor_line << std::endl;
+        if (line_number == cursor_line) {
+            //std::cout << "Cursor line: " << cursor_line << std::endl;
+            std::string before = line.substr(0, cursor_column - 1);
+            std::string after = line.substr(cursor_column);
+            ImGui::Text("%d: %s%s%s", line_number, before.c_str(), "|", after.c_str());
+        }
+        else {
+            ImGui::Text("%d: %s", line_number, line.c_str());
+        }
+        
     }
     ImGui::End();
 }
@@ -42,6 +55,14 @@ void CodeArea::load_file(const std::string& file_path) {
     }
 
     file.close();
+}
+
+void CodeArea::add_line(int line_number, const std::string& code) {
+    code_lines[line_number] = code;
+}
+
+void CodeArea::remove_line(int line_number) {
+    code_lines.erase(line_number);
 }
 
 std::string CodeArea::get_file_extension() const {

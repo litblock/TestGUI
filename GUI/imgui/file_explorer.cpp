@@ -66,7 +66,6 @@ namespace FileExplorer {
                             refresh();
                             code_areas.push_back(CodeArea());
                             code_areas.back().load_file(selected_file);
-                            
                             ImGui::CloseCurrentPopup();
                         }
                     }

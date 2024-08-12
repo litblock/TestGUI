@@ -7,10 +7,6 @@
 
 class CodeArea {
     public:
-        std::string file_name;
-        std::string file_path;
-        std::map<int, std::string> code_lines;
-
         CodeArea();
         void render();
         void load_file(const std::string& file_path);
@@ -20,8 +16,13 @@ class CodeArea {
         std::string get_file_extension() const;
         std::string get_line(int line_number) const;
         void refresh();
-
+        
+    private:
+        std::string file_name;
+        std::string file_path;
+        std::map<int, std::string> code_lines;
+        int cursor_line;
+        int cursor_column;
 };
-
 
 #endif 
