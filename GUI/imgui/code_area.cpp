@@ -11,7 +11,7 @@
 #include <fstream>
 #include <string>
 
-
+//goofy bug since ig the line number currently is part of column so its offset by a bit. 
 CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0) {}
 
 CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int cursor_column)
@@ -34,11 +34,25 @@ void CodeArea::render() {
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) && cursor_line < static_cast<int>(code_lines.size()) - 1) {
         cursor_line++;
     }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) && cursor_column > 0) {
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) && cursor_column > -1) {
         cursor_column--;
+        std::cout << cursor_column << std::endl;
     }
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)) && cursor_column < static_cast<int>(code_lines[cursor_line].length())) {
         cursor_column++;
+        std::cout << cursor_column << std::endl;
+        std::cout << code_lines[cursor_line].length() << std::endl;
+    }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) {
+        code_lines.insert({cursor_line + 1, code_lines[cursor_line].substr(cursor_column)});
+        code_lines[cursor_line] = code_lines[cursor_line].substr(0, cursor_column);
+        cursor_line++;
+        cursor_column = 0;
+    }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab))) {
+        // put \t ig
+        code_lines[cursor_line].insert(cursor_column, "    ");
+        cursor_column += 4;
     }
 
     for (const auto& [line_number, line] : code_lines) {
@@ -46,9 +60,13 @@ void CodeArea::render() {
         if (line_number == cursor_line) {
 
             float caret_width = 1.0f; 
-
-            ImVec2 rect_min = ImVec2(text_pos.x, text_pos.y + cursor_column * ImGui::GetTextLineHeight());
-            ImVec2 rect_max = ImVec2(text_pos.x + caret_width, text_pos.y + ImGui::GetTextLineHeight());
+            //float text_width = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, line.c_str()).x;
+            float char_width = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ").x;
+            
+            //std::cout << text_width << std::endl;
+        
+            ImVec2 rect_min = ImVec2(text_pos.x + cursor_column * char_width, text_pos.y);
+            ImVec2 rect_max = ImVec2(text_pos.x + caret_width + cursor_column * char_width, text_pos.y + ImGui::GetTextLineHeight());
             draw_list->AddRectFilled(rect_min, rect_max, IM_COL32(255, 255, 0, 255)); 
         }
         ImGui::Text("%d: %s", line_number, line.c_str());
