@@ -8,7 +8,7 @@
 class CodeArea {
     public:
         CodeArea();
-    CodeArea(std::string name, std::string path, int cursor_line, int cursor_column);
+        CodeArea(std::string name, std::string path, int cursor_line, int cursor_column);
         void render();
         void load_file(const std::string& file_path);
         void save_file(std::string file_path);
@@ -18,6 +18,7 @@ class CodeArea {
         std::string get_line(int line_number) const;
         void refresh();
         void set_cursor_line(int line);
+        void move_cursor(int direction);
     private:
         std::string file_name;
         std::string file_path;

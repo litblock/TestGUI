@@ -24,19 +24,34 @@ CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int curs
 
 void CodeArea::render() {
     ImGui::Begin(file_name.c_str());
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    //ImVec2 window_pos = ImGui::GetWindowPos();
+    //ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
+
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)) && cursor_line > 1) {
+        cursor_line--;
+    }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) && cursor_line < static_cast<int>(code_lines.size()) - 1) {
+        cursor_line++;
+    }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) && cursor_column > 0) {
+        cursor_column--;
+    }
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)) && cursor_column < static_cast<int>(code_lines[cursor_line].length())) {
+        cursor_column++;
+    }
+
     for (const auto& [line_number, line] : code_lines) {
-        //std::cout << "Line number: " << line_number << std::endl;
-        //std::cout << "Cursor line: " << cursor_line << std::endl;
+        ImVec2 text_pos = ImGui::GetCursorScreenPos();
         if (line_number == cursor_line) {
-            //std::cout << "Cursor line: " << cursor_line << std::endl;
-            std::string before = line.substr(0, cursor_column - 1);
-            std::string after = line.substr(cursor_column);
-            ImGui::Text("%d: %s%s%s", line_number, before.c_str(), "|", after.c_str());
+
+            float caret_width = 1.0f; 
+
+            ImVec2 rect_min = ImVec2(text_pos.x, text_pos.y + cursor_column * ImGui::GetTextLineHeight());
+            ImVec2 rect_max = ImVec2(text_pos.x + caret_width, text_pos.y + ImGui::GetTextLineHeight());
+            draw_list->AddRectFilled(rect_min, rect_max, IM_COL32(255, 255, 0, 255)); 
         }
-        else {
-            ImGui::Text("%d: %s", line_number, line.c_str());
-        }
-        
+        ImGui::Text("%d: %s", line_number, line.c_str());
     }
     ImGui::End();
 }
@@ -49,6 +64,8 @@ void CodeArea::load_file(const std::string& file_path) {
         std::cerr << "Failed to open file: " << file_path << std::endl;
         return;
     }
+
+
 
     code_lines.clear();
     std::string line;
