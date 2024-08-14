@@ -22,41 +22,80 @@ CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int curs
     code_lines[1] = "";
 }
 
+bool window_focused = false;
+
 void CodeArea::render() {
     ImGui::Begin(file_name.c_str());
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     //ImVec2 window_pos = ImGui::GetWindowPos();
     //ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
 
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)) && cursor_line > 1) {
-        cursor_line--;
+    if (ImGui::IsWindowFocused()) {
+        window_focused = true;
+    } else {
+        window_focused = false;
     }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) && cursor_line < static_cast<int>(code_lines.size()) - 1) {
-        cursor_line++;
-        if (cursor_column > static_cast<int>(code_lines[cursor_line].length())) {
-            cursor_column = static_cast<int>(code_lines[cursor_line].length());
+
+    if (window_focused) {
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)) && cursor_line > 1) {
+            cursor_line--;
+        }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) && cursor_line < static_cast<int>(code_lines.size())) {
+            cursor_line++;
+            if (cursor_column > static_cast<int>(code_lines[cursor_line].length())) {
+                cursor_column = static_cast<int>(code_lines[cursor_line].length());
+            }
+            // std::cout << cursor_line << std::endl;
+            // std::cout << code_lines.size() << std::endl;
+        }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) && cursor_column > 0) {
+            cursor_column--;
+            //std::cout << cursor_column << std::endl;
+        }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)) && cursor_column < static_cast<int>(code_lines[cursor_line].length())) {
+            cursor_column++;
+            //std::cout << cursor_column << std::endl;
+            //std::cout << code_lines[cursor_line].length() << std::endl;
+        }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) {
+            if (cursor_line == static_cast<int>(code_lines.size())) {
+                code_lines.insert({cursor_line + 1, ""});
+                cursor_line++;
+            } else {
+                if (cursor_column == 0) {
+                    std::string next = "";
+                    for (int i = cursor_line + 1; i <= static_cast<int>(code_lines.size()) - 1; i++) {
+                        std::string temp = code_lines[i];
+                        code_lines[i] = next;
+                        next = temp;
+                    }
+                    code_lines.insert(std::make_pair(cursor_line + 1, next));
+                } else {
+                    std::string previous = code_lines[cursor_line].substr(0, cursor_column);
+                    std::string next = code_lines[cursor_line].substr(cursor_column);
+                    code_lines[cursor_line] = previous;
+                    for (int i = cursor_line + 1; i <= static_cast<int>(code_lines.size()) - 1; i++) {
+                        std::string temp = code_lines[i];
+                        code_lines[i] = next;
+                        next = temp;
+                    }
+                    code_lines.insert(std::make_pair(cursor_line + 1, next));
+                    cursor_line++;
+                }
+                
+            }
+            // code_lines.insert({cursor_line + 1, code_lines[cursor_line].substr(cursor_column)});
+            // code_lines[cursor_line] = code_lines[cursor_line].substr(0, cursor_column);
+            // cursor_line++;
+            // cursor_column = 0;
+        }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab))) {
+            // put \t ig
+            code_lines[cursor_line].insert(cursor_column, "    ");
+            cursor_column += 4;
         }
     }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) && cursor_column > 0) {
-        cursor_column--;
-        //std::cout << cursor_column << std::endl;
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)) && cursor_column < static_cast<int>(code_lines[cursor_line].length())) {
-        cursor_column++;
-        //std::cout << cursor_column << std::endl;
-        //std::cout << code_lines[cursor_line].length() << std::endl;
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) {
-        code_lines.insert({cursor_line + 1, code_lines[cursor_line].substr(cursor_column)});
-        code_lines[cursor_line] = code_lines[cursor_line].substr(0, cursor_column);
-        cursor_line++;
-        cursor_column = 0;
-    }
-    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab))) {
-        // put \t ig
-        code_lines[cursor_line].insert(cursor_column, "    ");
-        cursor_column += 4;
-    }
+
 
     ImGui::Columns(2, "CodeColumns");
     ImGui::SetColumnWidth(0, 50.0f); 
@@ -71,18 +110,18 @@ void CodeArea::render() {
             float caret_width = 1.0f; 
             float char_width = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ").x;
 
-            ImVec2 rect_min = ImVec2(text_pos.x + cursor_column * char_width, text_pos.y);
-            ImVec2 rect_max = ImVec2(text_pos.x + caret_width + cursor_column * char_width, text_pos.y + ImGui::GetTextLineHeight());
+            ImVec2 rect_min = ImVec2(text_pos.x + ((cursor_column - 1) * char_width), text_pos.y);
+            ImVec2 rect_max = ImVec2(text_pos.x + caret_width + ((cursor_column - 1) * char_width), text_pos.y + ImGui::GetTextLineHeight());
             draw_list->AddRectFilled(rect_min, rect_max, IM_COL32(0, 111, 255, 255)); 
 
-            ImVec2 line_rect_min = ImVec2(text_pos.x, text_pos.y);
-            ImVec2 line_rect_max = ImVec2(text_pos.x + ImGui::GetWindowWidth(), text_pos.y + ImGui::GetTextLineHeight());
-            draw_list->AddRectFilled(line_rect_min, line_rect_max, IM_COL32(128, 128, 128, 100));
+            ImVec2 line_rect_min2 = ImVec2(ImGui::GetColumnOffset(1), text_pos.y);
+            ImVec2 line_rect_max2 = ImVec2(ImGui::GetWindowWidth(), text_pos.y + ImGui::GetTextLineHeight());
+            draw_list->AddRectFilled(line_rect_min2, line_rect_max2, IM_COL32(128, 128, 128, 100));
         }
         ImGui::Text("%s", line.c_str());
         ImGui::NextColumn();
     }
-
+    
     ImGui::End();
 }
 
