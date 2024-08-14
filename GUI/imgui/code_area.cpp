@@ -62,32 +62,29 @@ void CodeArea::render() {
                 code_lines.insert({cursor_line + 1, ""});
                 cursor_line++;
             } else {
-                if (cursor_column == 0) {
+                if (cursor_column == 0 && code_lines[cursor_line].empty()) {
                     std::string next = "";
                     for (int i = cursor_line + 1; i <= static_cast<int>(code_lines.size()) - 1; i++) {
                         std::string temp = code_lines[i];
                         code_lines[i] = next;
                         next = temp;
                     }
-                    code_lines.insert(std::make_pair(cursor_line + 1, next));
+                    code_lines.insert(std::make_pair(code_lines.size() + 1, next));
+                    cursor_line++;
                 } else {
-                    std::string previous = code_lines[cursor_line].substr(0, cursor_column);
-                    std::string next = code_lines[cursor_line].substr(cursor_column);
+                    std::string previous = code_lines[cursor_line].substr(0, cursor_column - 1);
+                    std::string next = code_lines[cursor_line].substr(cursor_column - 1);
                     code_lines[cursor_line] = previous;
                     for (int i = cursor_line + 1; i <= static_cast<int>(code_lines.size()) - 1; i++) {
                         std::string temp = code_lines[i];
                         code_lines[i] = next;
                         next = temp;
                     }
-                    code_lines.insert(std::make_pair(cursor_line + 1, next));
+                    code_lines.insert(std::make_pair(code_lines.size() + 1, next));
                     cursor_line++;
                 }
                 
             }
-            // code_lines.insert({cursor_line + 1, code_lines[cursor_line].substr(cursor_column)});
-            // code_lines[cursor_line] = code_lines[cursor_line].substr(0, cursor_column);
-            // cursor_line++;
-            // cursor_column = 0;
         }
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab))) {
             // put \t ig
@@ -96,7 +93,7 @@ void CodeArea::render() {
         }
     }
 
-
+    
     ImGui::Columns(2, "CodeColumns");
     ImGui::SetColumnWidth(0, 50.0f); 
 
@@ -118,6 +115,8 @@ void CodeArea::render() {
             ImVec2 line_rect_max2 = ImVec2(ImGui::GetWindowWidth(), text_pos.y + ImGui::GetTextLineHeight());
             draw_list->AddRectFilled(line_rect_min2, line_rect_max2, IM_COL32(128, 128, 128, 100));
         }
+        float padding = 7.5f;
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - padding);
         ImGui::Text("%s", line.c_str());
         ImGui::NextColumn();
     }
