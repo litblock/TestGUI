@@ -98,6 +98,36 @@ void CodeArea::render() {
             code_lines[cursor_line].insert(cursor_column, "    ");
             cursor_column += 4;
         }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space))) {
+            code_lines[cursor_line].insert(cursor_column, " ");
+            cursor_column++;
+        }
+        for (int key = ImGuiKey_A; key <= ImGuiKey_Z; key++) {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
+                // std::cout << "key pressed" << std::endl;
+                // std::cout << key << std::endl;
+                char c = 'a' + (key - ImGuiKey_A); 
+                if (cursor_line < static_cast<int>(code_lines.size())) {
+                    code_lines[cursor_line].insert(cursor_column, 1, c);
+                    cursor_column++;
+                } else {
+                    code_lines[cursor_line] += c;
+                    cursor_column++;
+                }
+            }
+        }
+        for (int key = ImGuiKey_0; key <= ImGuiKey_9; key++) {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
+                char c = '0' + (key - ImGuiKey_0); 
+                if (cursor_line < static_cast<int>(code_lines.size())) {
+                    code_lines[cursor_line].insert(cursor_column, 1, c);
+                    cursor_column++;
+                } else {
+                    code_lines[cursor_line] += c;
+                    cursor_column++;
+                }
+            }
+        }
     }
 
     
