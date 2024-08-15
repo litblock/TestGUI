@@ -10,6 +10,7 @@
 #include "code_area.h"
 #include <fstream>
 #include <string>
+#include <unordered_map>
 
 //goofy bug since ig the line number currently is part of column so its offset by a bit. 
 CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0) {}
@@ -62,6 +63,7 @@ void CodeArea::render() {
                 std::cout << "end the file" << std::endl;
                 code_lines.insert({cursor_line + 1, ""});
                 cursor_line++;
+                cursor_column = 0;
             } else {
                 if (cursor_column == 0 && cursor_line < static_cast<int>(code_lines.size())) {
                     std::cout << "beginning of a full line" << std::endl;
@@ -74,6 +76,7 @@ void CodeArea::render() {
                     }
                     code_lines.insert({cursor_line + 1, next});
                     cursor_line++;
+                    cursor_column = 0;
                 } else {
                     std::cout << "middle of a line" << std::endl;
                     std::cout << cursor_column << std::endl;
@@ -89,6 +92,7 @@ void CodeArea::render() {
                     }
                     code_lines.insert({code_lines.size() + 1, next});
                     cursor_line++;
+                    cursor_column = 0;
                 }
                 
             }
@@ -101,6 +105,12 @@ void CodeArea::render() {
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space))) {
             code_lines[cursor_line].insert(cursor_column, " ");
             cursor_column++;
+        }
+        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Backspace))) {
+            if (cursor_column > 0 && cursor_line < static_cast<int>(code_lines.size())) {
+                code_lines[cursor_line].erase(cursor_column - 1, 1);
+                cursor_column--;
+            }
         }
         for (int key = ImGuiKey_A; key <= ImGuiKey_Z; key++) {
             if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
@@ -124,6 +134,33 @@ void CodeArea::render() {
                     cursor_column++;
                 } else {
                     code_lines[cursor_line] += c;
+                    cursor_column++;
+                }
+            }
+        }
+
+        const std::unordered_map<ImGuiKey, char> punctuation_keys = {
+            {ImGuiKey_Comma, ','},
+            {ImGuiKey_Period, '.'},
+            {ImGuiKey_Semicolon, ';'},
+            {ImGuiKey_Apostrophe, '\''}, 
+            {ImGuiKey_Slash, '/'}, 
+            {ImGuiKey_Backslash, '\\'}, 
+            {ImGuiKey_Equal, '='},
+            {ImGuiKey_Minus, '-'},
+            {ImGuiKey_LeftBracket, '['},
+            {ImGuiKey_RightBracket, ']'},
+            {ImGuiKey_GraveAccent, '`'}
+            //add more ltr
+        };
+
+        for (const auto& [key, value] : punctuation_keys) {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(key))) {
+                if (cursor_line < static_cast<int>(code_lines.size())) {
+                    code_lines[cursor_line].insert(cursor_column, 1, value);
+                    cursor_column++;
+                } else {
+                    code_lines[cursor_line] += value;
                     cursor_column++;
                 }
             }
