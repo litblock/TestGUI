@@ -59,7 +59,9 @@ void CodeArea::render() {
             //std::cout << code_lines[cursor_line].length() << std::endl;
         }
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) {
-            if (cursor_line == static_cast<int>(code_lines.size())) {
+            if (cursor_line == static_cast<int>(code_lines.size()) && cursor_column == static_cast<int>(code_lines[cursor_line].length())) {
+                std::cout << code_lines.size() << std::endl;
+                std::cout << cursor_line << std::endl;
                 std::cout << "end the file" << std::endl;
                 code_lines.insert({cursor_line + 1, ""});
                 cursor_line++;
@@ -69,7 +71,7 @@ void CodeArea::render() {
                     std::cout << "beginning of a full line" << std::endl;
                     std::string next = "";
                     for (int i = cursor_line; i < static_cast<int>(code_lines.size()); i++) {
-                        //std::cout << next << std::endl;
+                        std::cout << next << std::endl;
                         std::string temp = code_lines[i];
                         code_lines[i] = next;
                         next = temp;
@@ -173,7 +175,16 @@ void CodeArea::render() {
     
     for (const auto& [line_number, line] : code_lines) {
 
+        if (line_number == cursor_line) {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255)); 
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128, 128, 128, 255)); 
+        }
+
         ImGui::Text("%d", line_number);
+
+        ImGui::PopStyleColor();
+
         ImGui::NextColumn();
         float padding = 7.5f;
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - padding);
@@ -207,8 +218,6 @@ void CodeArea::load_file(const std::string& file_path) {
         return;
     }
 
-
-
     code_lines.clear();
     std::string line;
     int line_number = 1;
@@ -238,4 +247,18 @@ void CodeArea::refresh() {
 
 void CodeArea::set_cursor_line(int line) {
     cursor_line = line;
+}
+
+char get_shifted_char(int key) {
+    static std::unordered_map<int, char> shift_map = {
+        { '1', '!' }, { '2', '@' }, { '3', '#' }, { '4', '$' }, { '5', '%' },
+        { '6', '^' }, { '7', '&' }, { '8', '*' }, { '9', '(' }, { '0', ')' },
+        { '-', '_' }, { '=', '+' }, { '[', '{' }, { ']', '}' }, { '\\', '|' },
+        { ';', ':' }, { '\'', '"' }, { ',', '<' }, { '.', '>' }, { '/', '?' }
+    };
+
+    if (shift_map.find(key) != shift_map.end()) {
+        return shift_map[key];
+    }
+    return key;
 }
