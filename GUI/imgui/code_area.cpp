@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include "syntax_highlighter.h"
 
 //goofy bug since ig the line number currently is part of column so its offset by a bit. 
 CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0) {}
@@ -221,6 +222,8 @@ void CodeArea::render() {
     
     ImGui::Columns(2, "CodeColumns");
     ImGui::SetColumnWidth(0, 50.0f); 
+
+    SyntaxHighlighter highlighter;
     
     for (const auto& [line_number, line] : code_lines) {
 
@@ -251,7 +254,7 @@ void CodeArea::render() {
             ImVec2 line_rect_max2 = ImVec2(ImGui::GetWindowWidth(), text_pos.y + ImGui::GetTextLineHeight());
             draw_list->AddRectFilled(line_rect_min2, line_rect_max2, IM_COL32(128, 128, 128, 100));
         }
-        ImGui::Text("%s", line.c_str());
+        highlighter.render(line.c_str(), draw_list, text_pos);
         ImGui::NextColumn();
     }
     
