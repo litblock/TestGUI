@@ -29,10 +29,10 @@ bool window_focused = false;
 //bool show = true;
 
 void CodeArea::render() {
-    std::cout << show << std::endl;
+    //std::cout << show << std::endl;
     if (!show) {
-        std::cout << show << std::endl;
-        return; 
+        //close();
+        return;
     }
     ImGui::Begin(file_name.c_str(), &show);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -316,4 +316,8 @@ char CodeArea::get_shifted_char(ImGuiKey key) {
         return shift_map[key];
     }
     return static_cast<char>(key);
+}
+
+void CodeArea::close() {
+    delete this;
 }

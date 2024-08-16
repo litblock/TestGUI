@@ -11,6 +11,11 @@ SyntaxHighlighter::SyntaxHighlighter() {
 }
 
 void SyntaxHighlighter::render(const std::string& line_text, ImDrawList* draw_list, ImVec2 text_pos) {
+    if (line_text.size() > 1000) {
+        draw_list->AddText(text_pos, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), line_text.c_str());
+        return;
+    }
+
     size_t start = 0;
     while (start < line_text.size()) {
         bool matched = false;
@@ -27,10 +32,9 @@ void SyntaxHighlighter::render(const std::string& line_text, ImDrawList* draw_li
             }
         }
         if (!matched) {
-            std::string token(1, line_text[start]);
-            draw_list->AddText(text_pos, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), token.c_str());
-            text_pos.x += ImGui::CalcTextSize(token.c_str()).x;
-            start++;
+            std::string remaining_text = line_text.substr(start);
+            draw_list->AddText(text_pos, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), remaining_text.c_str());
+            break;
         }
     }
 }

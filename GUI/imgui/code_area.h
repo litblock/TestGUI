@@ -19,6 +19,7 @@ class CodeArea {
         void refresh();
         void set_cursor_line(int line);
         void move_cursor(int direction);
+        void close();
 
         char get_shifted_char(ImGuiKey key);
     private:
