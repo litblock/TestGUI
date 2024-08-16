@@ -20,7 +20,7 @@ class CodeArea {
         void set_cursor_line(int line);
         void move_cursor(int direction);
 
-        char get_shifted_char(char c);
+        char get_shifted_char(int key);
     private:
         std::string file_name;
         std::string file_path;

@@ -114,17 +114,33 @@ void CodeArea::render() {
                 cursor_column--;
             }
         }
-        for (int key = ImGuiKey_A; key <= ImGuiKey_Z; key++) {
-            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
-                // std::cout << "key pressed" << std::endl;
-                // std::cout << key << std::endl;
-                char c = 'a' + (key - ImGuiKey_A); 
-                if (cursor_line < static_cast<int>(code_lines.size())) {
-                    code_lines[cursor_line].insert(cursor_column, 1, c);
-                    cursor_column++;
-                } else {
-                    code_lines[cursor_line] += c;
-                    cursor_column++;
+
+        bool shift_pressed = ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftShift)) || ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightShift));
+
+        if (shift_pressed) {
+            for (int key = ImGuiKey_A; key <= ImGuiKey_Z; key++) {
+                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
+                    char c = 'A' + (key - ImGuiKey_A);
+                    if (cursor_line < static_cast<int>(code_lines.size())) {
+                        code_lines[cursor_line].insert(cursor_column, 1, c);
+                        cursor_column++;
+                    } else {
+                        code_lines[cursor_line] += c;
+                        cursor_column++;
+                    }
+                }
+            }
+        } else {
+            for (int key = ImGuiKey_A; key <= ImGuiKey_Z; key++) {
+                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
+                    char c = 'a' + (key - ImGuiKey_A); 
+                    if (cursor_line < static_cast<int>(code_lines.size())) {
+                        code_lines[cursor_line].insert(cursor_column, 1, c);
+                        cursor_column++;
+                    } else {
+                        code_lines[cursor_line] += c;
+                        cursor_column++;
+                    }
                 }
             }
         }
@@ -249,7 +265,7 @@ void CodeArea::set_cursor_line(int line) {
     cursor_line = line;
 }
 
-char get_shifted_char(int key) {
+char CodeArea::get_shifted_char(int key) {
     static std::unordered_map<int, char> shift_map = {
         { '1', '!' }, { '2', '@' }, { '3', '#' }, { '4', '$' }, { '5', '%' },
         { '6', '^' }, { '7', '&' }, { '8', '*' }, { '9', '(' }, { '0', ')' },
