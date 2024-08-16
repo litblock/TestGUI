@@ -68,6 +68,7 @@ namespace FileExplorer {
                             temp.load_file(selected_file);
                             code_areas.push_back(temp);
                             temp.refresh();
+                            temp.render();
                             //temp.set_cursor_line(1);
                             ImGui::CloseCurrentPopup();
                         }

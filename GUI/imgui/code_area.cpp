@@ -14,21 +14,24 @@
 #include "syntax_highlighter.h"
 
 //goofy bug since ig the line number currently is part of column so its offset by a bit. 
-CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0) {}
+CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0, true) {}
 
-CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int cursor_column)
+CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int cursor_column, bool show)
     : file_name(std::move(name)),
       file_path(std::move(path)),
       cursor_line(cursor_line),
-      cursor_column(cursor_column) {
+      cursor_column(cursor_column), 
+      show(show) {
     code_lines[1] = "";
 }
 
 bool window_focused = false;
-bool show = true;
+//bool show = true;
 
 void CodeArea::render() {
+    std::cout << show << std::endl;
     if (!show) {
+        std::cout << show << std::endl;
         return; 
     }
     ImGui::Begin(file_name.c_str(), &show);
