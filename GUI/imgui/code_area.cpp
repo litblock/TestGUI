@@ -24,12 +24,14 @@ CodeArea::CodeArea(std::string name, std::string path, int cursor_line, int curs
 }
 
 bool window_focused = false;
+bool show = true;
 
 void CodeArea::render() {
-    ImGui::Begin(file_name.c_str());
+    if (!show) {
+        return; 
+    }
+    ImGui::Begin(file_name.c_str(), &show);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    //ImVec2 window_pos = ImGui::GetWindowPos();
-    //ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
 
     if (ImGui::IsWindowFocused()) {
         window_focused = true;
@@ -144,15 +146,31 @@ void CodeArea::render() {
                 }
             }
         }
-        for (int key = ImGuiKey_0; key <= ImGuiKey_9; key++) {
-            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
-                char c = '0' + (key - ImGuiKey_0); 
-                if (cursor_line < static_cast<int>(code_lines.size())) {
-                    code_lines[cursor_line].insert(cursor_column, 1, c);
-                    cursor_column++;
-                } else {
-                    code_lines[cursor_line] += c;
-                    cursor_column++;
+        
+        if (shift_pressed) {
+            for (int key = ImGuiKey_0; key <= ImGuiKey_9; key++) {
+                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
+                    char c = get_shifted_char(static_cast<ImGuiKey>(key)); 
+                    if (cursor_line < static_cast<int>(code_lines.size())) {
+                        code_lines[cursor_line].insert(cursor_column, 1, c);
+                        cursor_column++;
+                    } else {
+                        code_lines[cursor_line] += c;
+                        cursor_column++;
+                    }
+                }
+            }
+        } else {
+            for (int key = ImGuiKey_0; key <= ImGuiKey_9; key++) {
+                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(static_cast<ImGuiKey>(key)))) {
+                    char c = '0' + (key - ImGuiKey_0); 
+                    if (cursor_line < static_cast<int>(code_lines.size())) {
+                        code_lines[cursor_line].insert(cursor_column, 1, c);
+                        cursor_column++;
+                    } else {
+                        code_lines[cursor_line] += c;
+                        cursor_column++;
+                    }
                 }
             }
         }
@@ -172,14 +190,29 @@ void CodeArea::render() {
             //add more ltr
         };
 
-        for (const auto& [key, value] : punctuation_keys) {
-            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(key))) {
-                if (cursor_line < static_cast<int>(code_lines.size())) {
-                    code_lines[cursor_line].insert(cursor_column, 1, value);
-                    cursor_column++;
-                } else {
-                    code_lines[cursor_line] += value;
-                    cursor_column++;
+        if (shift_pressed) {
+            for (const auto& [key, value] : punctuation_keys) {
+                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(key))) {
+                    char shift = get_shifted_char(key);
+                    if (cursor_line < static_cast<int>(code_lines.size())) {
+                        code_lines[cursor_line].insert(cursor_column, 1, shift);
+                        cursor_column++;
+                    } else {
+                        code_lines[cursor_line] += shift;
+                        cursor_column++;
+                    }
+                }
+            }
+        } else {
+            for (const auto& [key, value] : punctuation_keys) {
+                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(key))) {
+                    if (cursor_line < static_cast<int>(code_lines.size())) {
+                        code_lines[cursor_line].insert(cursor_column, 1, value);
+                        cursor_column++;
+                    } else {
+                        code_lines[cursor_line] += value;
+                        cursor_column++;
+                    }
                 }
             }
         }
@@ -265,16 +298,16 @@ void CodeArea::set_cursor_line(int line) {
     cursor_line = line;
 }
 
-char CodeArea::get_shifted_char(int key) {
-    static std::unordered_map<int, char> shift_map = {
-        { '1', '!' }, { '2', '@' }, { '3', '#' }, { '4', '$' }, { '5', '%' },
-        { '6', '^' }, { '7', '&' }, { '8', '*' }, { '9', '(' }, { '0', ')' },
-        { '-', '_' }, { '=', '+' }, { '[', '{' }, { ']', '}' }, { '\\', '|' },
-        { ';', ':' }, { '\'', '"' }, { ',', '<' }, { '.', '>' }, { '/', '?' }
+char CodeArea::get_shifted_char(ImGuiKey key) {
+    static std::unordered_map<ImGuiKey, char> shift_map = {
+        { ImGuiKey_1, '!' }, { ImGuiKey_2, '@' }, { ImGuiKey_3, '#' }, { ImGuiKey_4, '$' }, { ImGuiKey_5, '%' },
+        { ImGuiKey_6, '^' }, { ImGuiKey_7, '&' }, { ImGuiKey_8, '*' }, { ImGuiKey_9, '(' }, { ImGuiKey_0, ')' },
+        { ImGuiKey_Minus, '_' }, { ImGuiKey_Equal, '+' }, { ImGuiKey_LeftBracket, '{' }, { ImGuiKey_RightBracket, '}' }, { ImGuiKey_Backslash, '|' },
+        { ImGuiKey_Semicolon, ':' }, { ImGuiKey_Apostrophe, '"' }, { ImGuiKey_Comma, '<' }, { ImGuiKey_Period, '>' }, { ImGuiKey_Slash, '?' }
     };
 
     if (shift_map.find(key) != shift_map.end()) {
         return shift_map[key];
     }
-    return key;
+    return static_cast<char>(key);
 }

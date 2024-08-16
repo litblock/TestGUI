@@ -20,13 +20,14 @@ class CodeArea {
         void set_cursor_line(int line);
         void move_cursor(int direction);
 
-        char get_shifted_char(int key);
+        char get_shifted_char(ImGuiKey key);
     private:
         std::string file_name;
         std::string file_path;
         std::map<int, std::string> code_lines;
         int cursor_line = 1;
         int cursor_column = 0;
+        bool show;
 };
 
 #endif 
