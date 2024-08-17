@@ -34,7 +34,7 @@ void CodeArea::render() {
         //close();
         return;
     }
-    ImGui::Begin(file_name.c_str(), &show);
+    ImGui::Begin(file_name.c_str(), &show, ImGuiWindowFlags_HorizontalScrollbar);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
     if (ImGui::IsWindowFocused()) {
@@ -325,28 +325,42 @@ void CodeArea::close() {
 
 void CodeArea::move_cursor() {
     if (ImGui::IsMouseClicked(0)) {
-        std::cout << "mouse clicked" << std::endl;
         ImVec2 mouse_pos = ImGui::GetMousePos();
-        ImVec2 window_pos = ImGui::GetWindowPos(); 
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        float title_bar_height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
+        float scroll_y = ImGui::GetScrollY();
         float line_height = ImGui::GetTextLineHeight();
         float char_width = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ").x;
 
-        std::cout << "Mouse Position: (" << mouse_pos.x << ", " << mouse_pos.y << ")" << std::endl;
-        std::cout << "Window Position: (" << window_pos.x << ", " << window_pos.y << ")" << std::endl;
-        std::cout << "Line Height: " << line_height << std::endl;
-        std::cout << "Character Width: " << char_width << std::endl;
-        
-        float line_number_width = ImGui::CalcTextSize("0000").x + 10.0f; 
+        float line_number_width = ImGui::GetColumnOffset(1);
+        float text_start_x = window_pos.x + line_number_width;
 
-        int new_cursor_line = static_cast<int>((mouse_pos.y - window_pos.y) / line_height);
-        int new_cursor_column = static_cast<int>((mouse_pos.x - window_pos.x - line_number_width) / char_width);
-
-        std::cout << "New cursor line: " << new_cursor_line << std::endl;
-        std::cout << "New cursor column: " << new_cursor_column << std::endl;
-
-        if (new_cursor_line >= 0 && new_cursor_line < static_cast<int>(code_lines.size())) {
-            cursor_line = new_cursor_line;
-            cursor_column = std::min(std::max(new_cursor_column, 0), static_cast<int>(code_lines[cursor_line].size()));
+        if (code_lines.empty()) {
+            code_lines[1] = "";
         }
+        int num_lines = static_cast<int>(code_lines.size());
+
+        std::cout << "Mouse pos: (" << mouse_pos.x << ", " << mouse_pos.y << ")" << std::endl;
+        std::cout << "Window pos: (" << window_pos.x << ", " << window_pos.y << ")" << std::endl;
+        std::cout << "Title bar height: " << title_bar_height << std::endl;
+        std::cout << "Scroll Y: " << scroll_y << std::endl;
+        std::cout << "Line height: " << line_height << std::endl;
+        std::cout << "Char width: " << char_width << std::endl;
+        std::cout << "Line number width: " << line_number_width << std::endl;
+        std::cout << "Text start X: " << text_start_x << std::endl;
+        std::cout << "Number of code lines: " << num_lines << std::endl;
+
+        int new_cursor_line = std::max(1, static_cast<int>((mouse_pos.y - window_pos.y - title_bar_height + scroll_y) / line_height) + 1);
+        new_cursor_line = std::min(new_cursor_line, num_lines);
+        int new_cursor_column = std::max(0, static_cast<int>((mouse_pos.x - text_start_x) / char_width));
+
+        std::cout << "Calculated new cursor position: line " << new_cursor_line << ", column " << new_cursor_column << std::endl;
+
+        cursor_line = new_cursor_line;
+        cursor_column = new_cursor_column;
+        if (cursor_line <= num_lines) {
+            cursor_column = std::min(cursor_column, static_cast<int>(code_lines[cursor_line].length()));
+        }
+        std::cout << "Updated cursor position: line " << cursor_line << ", column " << cursor_column << std::endl;
     }
 }
