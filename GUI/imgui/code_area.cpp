@@ -11,7 +11,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
-#include "syntax_highlighter.h"
+//#include "syntax_highlighter.h"
 
 //goofy bug since ig the line number currently is part of column so its offset by a bit. 
 CodeArea::CodeArea() : CodeArea("Untitled", "", 1, 0, true) {}
@@ -226,7 +226,7 @@ void CodeArea::render() {
     ImGui::Columns(2, "CodeColumns");
     ImGui::SetColumnWidth(0, 50.0f); 
 
-    SyntaxHighlighter highlighter;
+    //SyntaxHighlighter highlighter;
     
     for (const auto& [line_number, line] : code_lines) {
 
@@ -257,10 +257,11 @@ void CodeArea::render() {
             ImVec2 line_rect_max2 = ImVec2(ImGui::GetWindowWidth(), text_pos.y + ImGui::GetTextLineHeight());
             draw_list->AddRectFilled(line_rect_min2, line_rect_max2, IM_COL32(128, 128, 128, 100));
         }
-        highlighter.render(line.c_str(), draw_list, text_pos);
+        ImGui::SetCursorScreenPos(text_pos);
+        ImGui::TextUnformatted(line.c_str());
         ImGui::NextColumn();
     }
-    
+    move_cursor();
     ImGui::End();
 }
 
@@ -320,4 +321,32 @@ char CodeArea::get_shifted_char(ImGuiKey key) {
 
 void CodeArea::close() {
     delete this;
+}
+
+void CodeArea::move_cursor() {
+    if (ImGui::IsMouseClicked(0)) {
+        std::cout << "mouse clicked" << std::endl;
+        ImVec2 mouse_pos = ImGui::GetMousePos();
+        ImVec2 window_pos = ImGui::GetWindowPos(); 
+        float line_height = ImGui::GetTextLineHeight();
+        float char_width = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ").x;
+
+        std::cout << "Mouse Position: (" << mouse_pos.x << ", " << mouse_pos.y << ")" << std::endl;
+        std::cout << "Window Position: (" << window_pos.x << ", " << window_pos.y << ")" << std::endl;
+        std::cout << "Line Height: " << line_height << std::endl;
+        std::cout << "Character Width: " << char_width << std::endl;
+        
+        float line_number_width = ImGui::CalcTextSize("0000").x + 10.0f; 
+
+        int new_cursor_line = static_cast<int>((mouse_pos.y - window_pos.y) / line_height);
+        int new_cursor_column = static_cast<int>((mouse_pos.x - window_pos.x - line_number_width) / char_width);
+
+        std::cout << "New cursor line: " << new_cursor_line << std::endl;
+        std::cout << "New cursor column: " << new_cursor_column << std::endl;
+
+        if (new_cursor_line >= 0 && new_cursor_line < static_cast<int>(code_lines.size())) {
+            cursor_line = new_cursor_line;
+            cursor_column = std::min(std::max(new_cursor_column, 0), static_cast<int>(code_lines[cursor_line].size()));
+        }
+    }
 }
