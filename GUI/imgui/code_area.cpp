@@ -36,6 +36,7 @@ void CodeArea::render() {
         return;
     }
     ImGui::Begin(file_name.c_str(), &show, ImGuiWindowFlags_HorizontalScrollbar);
+    //ImGui::SetScrollX(ImGui::GetScrollX() + 10.0f);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 window_pos = ImGui::GetWindowPos();
     ImVec2 cursor_screen_pos = ImGui::GetCursorScreenPos();
@@ -225,7 +226,7 @@ void CodeArea::render() {
         }
     }
 
-    
+    float line_height = ImGui::GetTextLineHeight();
     ImGui::Columns(2, "CodeColumns");
     ImGui::SetColumnWidth(0, 50.0f); 
 
@@ -265,6 +266,7 @@ void CodeArea::render() {
         ImGui::TextUnformatted(line.c_str());
         ImGui::NextColumn();
     }
+    ImGui::ShowMetricsWindow();
 
     // for (int i = 0; i < static_cast<int>(code_lines.size()); ++i) {
     //     float y = cursor_screen_pos.y + i * ImGui::GetTextLineHeight();
@@ -274,8 +276,9 @@ void CodeArea::render() {
     //         IM_COL32(0, 255, 0, 128)
     //     );
     // }
+    ImVec2 text_start_pos = ImGui::GetCursorScreenPos();
 
-    move_cursor();
+    move_cursor(text_start_pos, line_height);
     ImGui::End();
 }
 
@@ -337,24 +340,21 @@ void CodeArea::close() {
     delete this;
 }
 
-void CodeArea::move_cursor() {
-    if (ImGui::IsMouseClicked(0)) {
+void CodeArea::move_cursor(const ImVec2& content_start_pos, float line_height) {
+    if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered()) {
         ImVec2 mouse_pos = ImGui::GetMousePos();
         ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 content_pos = ImGui::GetCursorStartPos();
+        
         float scroll_y = ImGui::GetScrollY();
+        std::cout << "Scroll y: " << scroll_y << std::endl;
         float scroll_x = ImGui::GetScrollX();
         
         float line_number_width = ImGui::GetColumnOffset(1);
-        ImVec2 text_area_min = ImVec2(window_pos.x + line_number_width, window_pos.y);
-        ImVec2 text_area_max = ImVec2(window_pos.x + ImGui::GetWindowWidth(), window_pos.y + ImGui::GetWindowHeight());
-
         float char_width = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ").x;
-        float line_height = ImGui::GetTextLineHeight();
-        
-        std::cout << "Line height: " << line_height << std::endl;
 
-        float rel_y = mouse_pos.y - text_area_min.y + scroll_y;
-        float rel_x = mouse_pos.x - text_area_min.x + scroll_x;
+        float rel_y = (mouse_pos.y - window_pos.y - content_pos.y + scroll_y - content_start_pos.y);
+        float rel_x = (mouse_pos.x - window_pos.x - content_pos.x + scroll_x - content_start_pos.x - line_number_width);
 
         int new_cursor_line = static_cast<int>(std::floor(rel_y / line_height)) + 1;
         int new_cursor_column = static_cast<int>(std::floor(rel_x / char_width));
@@ -371,12 +371,14 @@ void CodeArea::move_cursor() {
         cursor_line = new_cursor_line;
         cursor_column = new_cursor_column;
 
+        std::cout << "Content start pos: (" << content_start_pos.x << ", " << content_start_pos.y << ")\n";
         std::cout << "Mouse pos: (" << mouse_pos.x << ", " << mouse_pos.y << ")\n";
-        std::cout << "Text area: (" << text_area_min.x << ", " << text_area_min.y << ") to ("
-                  << text_area_max.x << ", " << text_area_max.y << ")\n";
+        std::cout << "Window pos: (" << window_pos.x << ", " << window_pos.y << ")\n";
+        std::cout << "Content pos: (" << content_pos.x << ", " << content_pos.y << ")\n";
         std::cout << "Scroll: (" << scroll_x << ", " << scroll_y << ")\n";
         std::cout << "Relative pos: (" << rel_x << ", " << rel_y << ")\n";
         std::cout << "New cursor: line " << cursor_line << ", column " << cursor_column << "\n";
         std::cout << "Number of lines: " << num_lines << "\n";
+        std::cout << "Line height: " << line_height << "\n";
     }
 }

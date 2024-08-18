@@ -18,7 +18,7 @@ class CodeArea {
         std::string get_line(int line_number) const;
         void refresh();
         void set_cursor_line(int line);
-        void move_cursor();
+        void move_cursor(const ImVec2& text_start_pos, float line_height);
         void close();
 
         char get_shifted_char(ImGuiKey key);
